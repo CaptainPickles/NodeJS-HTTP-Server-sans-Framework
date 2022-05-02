@@ -4,7 +4,6 @@ const routes = ["/"]
 
 http.createServer(function (req, res) {
     try {
-
         res.writeHead(200, { 'Content-Type': 'text/html' }); // http header
         const url = req.url;
         const method = req.method
@@ -24,7 +23,7 @@ http.createServer(function (req, res) {
 
     } catch (error) {
         res.statusCode = 500
-        res.write(`<h1>${res.statusCode} Méthode non authorisée</h1>`);
+        res.write(`<h1>${res.statusCode} Erreur Interne au Serveur</h1>`);
         res.end()
     }
 
