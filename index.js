@@ -21,24 +21,29 @@ http.createServer(async function (req, res) {
         const method = req.method
         if (routes.includes(url) === false) {
             res.statusCode = 404
-            res.write(`<h1>${res.statusCode} Page Introuvable</h1>`);
+            res.writeHead(res.statusCode)
+            const content = await readFile(`${__dirname}/public/pages/notFound.html`)
+            res.write(content);
             res.end();
         }
         else if (url === '/' && method === "GET") {
-
             const content = await readFile(`${__dirname}/public/pages/index.html`)
             res.write(content);
             res.end();
         } else if (url === '/' && method !== "GET") {
             res.statusCode = 403
-            res.write(`<h1>${res.statusCode} Méthode non authorisée</h1>`);
+            res.writeHead(res.statusCode)
+            const content = await readFile(`${__dirname}/public/pages/unauthorized.html`)
+            res.write(content);
             res.end()
         }
 
     } catch (error) {
         console.log(error)
         res.statusCode = 500
-        res.write(`<h1>${res.statusCode} Erreur Interne au Serveur</h1>`);
+        res.writeHead(res.statusCode)
+        const content = await readFile(`${__dirname}/public/pages/serverError.html`)
+        res.write(content);
         res.end()
     }
 
