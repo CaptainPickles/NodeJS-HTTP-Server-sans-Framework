@@ -1,7 +1,8 @@
 const fs = require('fs');
 const http = require('http');
 
-const routes = ["/", "/public/images/image.jpg", "/public/css/style.css", "/public/js/script.js"]
+const routes = ["/", "/public/images/image.jpg", "/public/css/style.css", "/public/js/script.js", "/api/names"]
+
 
 async function readFile(path) {
     return new Promise((resolve, reject) => {
@@ -15,6 +16,11 @@ async function readFile(path) {
 }
 
 http.createServer(async function (req, res) {
+    const memoryDb = new Map(); // est global
+    let id = 0; // doit être global
+    memoryDb.set(id++, { nom: "Alice" }) // voici comment set une nouvelle entrée.
+    memoryDb.set(id++, { nom: "Bob" })
+    memoryDb.set(id++, { nom: "Charlie" })
     try {
         res.writeHead(200, { 'Content-Type': 'text/html' }); // http header
         const url = req.url;
@@ -50,6 +56,11 @@ http.createServer(async function (req, res) {
             res.writeHead(200, { 'Content-Type': 'text/js' });
             const content = await readFile(`${__dirname}/public/js/script.js`)
             res.write(content);
+            res.end()
+        } else if (url === "/api/names" && method === 'GET') {
+            res.writeHead(200, { 'Content-Type': 'text/json' });
+            json = Array.from(map.entries());
+            res.write(json)
             res.end()
         }
 
