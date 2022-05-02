@@ -1,11 +1,11 @@
 const fs = require('fs');
 const http = require('http');
 
-const routes = ["/"]
+const routes = ["/", "/public/images/image.jpg"]
 
 async function readFile(path) {
     return new Promise((resolve, reject) => {
-        fs.readFile(path, 'utf8', function (err, data) {
+        fs.readFile(path, function (err, data) {
             if (err) {
                 reject(err);
             }
@@ -34,6 +34,12 @@ http.createServer(async function (req, res) {
             res.statusCode = 403
             res.writeHead(res.statusCode)
             const content = await readFile(`${__dirname}/public/pages/unauthorized.html`)
+            res.write(content);
+            res.end()
+        } else if (url === '/public/images/image.jpg' && method === "GET") {
+            res.writeHead(200, { 'Content-Type': 'image/jpg' });
+            const content = await readFile(`${__dirname}/public/images/image.jpg`)
+            console.log(content)
             res.write(content);
             res.end()
         }
