@@ -1,7 +1,7 @@
 const fs = require('fs');
 const http = require('http');
 
-const routes = ["/", "/public/images/image.jpg"]
+const routes = ["/", "/public/images/image.jpg", "/public/css/style.css", "/public/js/script.js"]
 
 async function readFile(path) {
     return new Promise((resolve, reject) => {
@@ -39,7 +39,16 @@ http.createServer(async function (req, res) {
         } else if (url === '/public/images/image.jpg' && method === "GET") {
             res.writeHead(200, { 'Content-Type': 'image/jpg' });
             const content = await readFile(`${__dirname}/public/images/image.jpg`)
-            console.log(content)
+            res.write(content);
+            res.end()
+        } else if (url === "/public/css/style.css" && method === "GET") {
+            res.writeHead(200, { 'Content-Type': 'text/css' });
+            const content = await readFile(`${__dirname}/public/css/style.css`)
+            res.write(content);
+            res.end()
+        } else if (url === "/public/js/script.js" && method === "GET") {
+            res.writeHead(200, { 'Content-Type': 'text/js' });
+            const content = await readFile(`${__dirname}/public/js/script.js`)
             res.write(content);
             res.end()
         }
