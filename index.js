@@ -16,16 +16,16 @@ async function readFile(path) {
 }
 
 http.createServer(async function (req, res) {
-    const memoryDb = new Map(); // est global
-    let id = 0; // doit être global
-    memoryDb.set(id++, { nom: "Alice" }) // voici comment set une nouvelle entrée.
-    memoryDb.set(id++, { nom: "Bob" })
-    memoryDb.set(id++, { nom: "Charlie" })
     try {
+        const memoryDb = new Map(); // est global
+        let id = 0; // doit être global
+        memoryDb.set(id++, { nom: "Alice" }) // voici comment set une nouvelle entrée.
+        memoryDb.set(id++, { nom: "Bob" })
+        memoryDb.set(id++, { nom: "Charlie" })
         res.writeHead(200, { 'Content-Type': 'text/html' }); // http header
         const url = req.url;
         const method = req.method
-        if (routes.includes(url) === false && url.startsWith("/public/") === false) {
+        if (routes.includes(url) === false && url.startsWith("/public/") === false && url.startsWith("/api/name/") === false) {
             res.statusCode = 404
             res.writeHead(res.statusCode)
             const content = await readFile(`${__dirname}/public/pages/notFound.html`)
@@ -50,10 +50,79 @@ http.createServer(async function (req, res) {
             res.write(content);
             res.end()
         } else if (url === "/api/names" && method === 'GET') {
-            res.writeHead(200, { 'Content-Type': 'text/json' });
-            json = Array.from(map.entries());
-            res.write(json)
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            const json = Object.fromEntries(memoryDb);
+            res.write(JSON.stringify(json))
             res.end()
+        } else if (url === "/api/names" && method === 'POST') {
+            let data = '';
+            req.on('data', chunk => {
+                data += chunk;
+            });
+            req.on('end', () => {
+                data = JSON.parse(data); // ici vous récupérez le JSON sous forme d'un objet Javascript 
+                if (data && data.name) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    memoryDb.set(id++, data)
+                    res.write(JSON.stringify(data))
+                } else {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                }
+                res.end(); // ici termine votre route
+            });
+        } else if (url.startsWith("/api/name/") && method === 'DELETE') {
+            const urlSplit = url.split("/")
+            const id = urlSplit[urlSplit.length - 1]
+            const toDelete = memoryDb.get(parseInt(id))
+            if (toDelete) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                memoryDb.delete(parseInt(id))
+
+            } else {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+            }
+            res.end()
+        } else if (url.startsWith("/api/name/") && method === 'PUT') {
+            let data = '';
+            req.on('data', chunk => {
+                data += chunk;
+            });
+            req.on('end', () => {
+                data = JSON.parse(data); // ici vous récupérez le JSON sous forme d'un objet Javascript 
+                const urlSplit = url.split("/")
+                const idToModify = urlSplit[urlSplit.length - 1]
+                const toModify = memoryDb.get(parseInt(idToModify))
+                if (data && data.name && toModify) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    memoryDb.set(parseInt(idToModify), data)
+                    res.write(JSON.stringify(data))
+                } else {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                }
+                console.log(memoryDb)
+                res.end(); // ici termine votre route
+            });
+        }
+        else if (url.startsWith("/api/name/") && method === 'GET') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            const urlSplit = url.split('/')
+            console.log(urlSplit)
+            const idToAdd = urlSplit[urlSplit.length - 1]
+            console.log(idToAdd)
+            const object = memoryDb.get(parseInt(idToAdd))
+            console.log(object)
+            if (idToAdd && object) {
+                res.write(JSON.stringify(object))
+                res.end()
+            } else if (idToAdd && object === undefined) {
+                res.writeHead(204);
+                res.end()
+            } else {
+                res.writeHead(404);
+                res.end()
+            }
+
+
         }
 
     } catch (error) {
