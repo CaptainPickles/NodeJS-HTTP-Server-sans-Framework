@@ -82,21 +82,39 @@ http.createServer(async function (req, res) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
             }
             res.end()
-        } else if (url === "/api/name" && method === 'PUT') {
-
+        } else if (url.startsWith("/api/name/") && method === 'PUT') {
+            let data = '';
+            req.on('data', chunk => {
+                data += chunk;
+            });
+            req.on('end', () => {
+                data = JSON.parse(data); // ici vous récupérez le JSON sous forme d'un objet Javascript 
+                const urlSplit = url.split("/")
+                const idToModify = urlSplit[urlSplit.length - 1]
+                const toModify = memoryDb.get(parseInt(idToModify))
+                if (data && data.name && toModify) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    memoryDb.set(parseInt(idToModify), data)
+                    res.write(JSON.stringify(data))
+                } else {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                }
+                console.log(memoryDb)
+                res.end(); // ici termine votre route
+            });
         }
         else if (url.startsWith("/api/name/") && method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             const urlSplit = url.split('/')
             console.log(urlSplit)
-            const id = urlSplit[urlSplit.length - 1]
-            console.log(id)
-            const object = memoryDb.get(parseInt(id))
+            const idToAdd = urlSplit[urlSplit.length - 1]
+            console.log(idToAdd)
+            const object = memoryDb.get(parseInt(idToAdd))
             console.log(object)
-            if (id && object) {
+            if (idToAdd && object) {
                 res.write(JSON.stringify(object))
                 res.end()
-            } else if (id && object === undefined) {
+            } else if (idToAdd && object === undefined) {
                 res.writeHead(204);
                 res.end()
             } else {
