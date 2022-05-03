@@ -25,7 +25,7 @@ http.createServer(async function (req, res) {
         res.writeHead(200, { 'Content-Type': 'text/html' }); // http header
         const url = req.url;
         const method = req.method
-        if (routes.includes(url) === false && url.startsWith("/public/") === false) {
+        if (routes.includes(url) === false && url.startsWith("/public/") === false && url.startsWith("/api/name/") === false) {
             res.statusCode = 404
             res.writeHead(res.statusCode)
             const content = await readFile(`${__dirname}/public/pages/notFound.html`)
@@ -53,6 +53,10 @@ http.createServer(async function (req, res) {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             const json = Object.fromEntries(memoryDb);
             res.write(JSON.stringify(json))
+            res.end()
+        } else if (url.startsWith("/api/name/") && method === 'GET') {
+            console.log("test")
+            res.write("test")
             res.end()
         }
 
