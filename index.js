@@ -25,10 +25,17 @@ http.createServer(async function (req, res) {
         res.writeHead(200, { 'Content-Type': 'text/html' }); // http header
         const url = req.url;
         const method = req.method
-        if (routes.includes(url) === false) {
+        if (routes.includes(url) === false && url.startsWith("/public/") === false) {
             res.statusCode = 404
             res.writeHead(res.statusCode)
             const content = await readFile(`${__dirname}/public/pages/notFound.html`)
+            res.write(content);
+            res.end();
+        } else if (url.startsWith("/public/")) {
+            const urlSplit = url.split("/")
+            const extension = urlSplit[2]
+            const fileName = urlSplit[3]
+            const content = await readFile(`${__dirname}/public/${extension}/${fileName}`)
             res.write(content);
             res.end();
         }
@@ -40,21 +47,6 @@ http.createServer(async function (req, res) {
             res.statusCode = 403
             res.writeHead(res.statusCode)
             const content = await readFile(`${__dirname}/public/pages/unauthorized.html`)
-            res.write(content);
-            res.end()
-        } else if (url === '/public/images/image.jpg' && method === "GET") {
-            res.writeHead(200, { 'Content-Type': 'image/jpg' });
-            const content = await readFile(`${__dirname}/public/images/image.jpg`)
-            res.write(content);
-            res.end()
-        } else if (url === "/public/css/style.css" && method === "GET") {
-            res.writeHead(200, { 'Content-Type': 'text/css' });
-            const content = await readFile(`${__dirname}/public/css/style.css`)
-            res.write(content);
-            res.end()
-        } else if (url === "/public/js/script.js" && method === "GET") {
-            res.writeHead(200, { 'Content-Type': 'text/js' });
-            const content = await readFile(`${__dirname}/public/js/script.js`)
             res.write(content);
             res.end()
         } else if (url === "/api/names" && method === 'GET') {
