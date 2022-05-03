@@ -54,7 +54,26 @@ http.createServer(async function (req, res) {
             const json = Object.fromEntries(memoryDb);
             res.write(JSON.stringify(json))
             res.end()
-        } else if (url.startsWith("/api/name/") && method === 'GET') {
+        } else if (url === "/api/names" && method === 'POST') {
+            let data = '';
+            req.on('data', chunk => {
+                data += chunk;
+            });
+            req.on('end', () => {
+                data = JSON.parse(data); // ici vous récupérez le JSON sous forme d'un objet Javascript 
+                if (data && data.name) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    memoryDb.set(id++, data)
+                    res.write(JSON.stringify(data))
+                } else {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                }
+                res.end(); // ici termine votre route
+            });
+
+
+        }
+        else if (url.startsWith("/api/name/") && method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             const urlSplit = url.split('/')
             console.log(urlSplit)
