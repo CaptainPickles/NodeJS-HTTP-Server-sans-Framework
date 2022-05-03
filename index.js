@@ -16,12 +16,12 @@ async function readFile(path) {
 }
 
 http.createServer(async function (req, res) {
-    const memoryDb = new Map(); // est global
-    let id = 0; // doit être global
-    memoryDb.set(id++, { nom: "Alice" }) // voici comment set une nouvelle entrée.
-    memoryDb.set(id++, { nom: "Bob" })
-    memoryDb.set(id++, { nom: "Charlie" })
     try {
+        const memoryDb = new Map(); // est global
+        let id = 0; // doit être global
+        memoryDb.set(id++, { nom: "Alice" }) // voici comment set une nouvelle entrée.
+        memoryDb.set(id++, { nom: "Bob" })
+        memoryDb.set(id++, { nom: "Charlie" })
         res.writeHead(200, { 'Content-Type': 'text/html' }); // http header
         const url = req.url;
         const method = req.method
@@ -50,9 +50,9 @@ http.createServer(async function (req, res) {
             res.write(content);
             res.end()
         } else if (url === "/api/names" && method === 'GET') {
-            res.writeHead(200, { 'Content-Type': 'text/json' });
-            json = Array.from(map.entries());
-            res.write(json)
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            const json = Object.fromEntries(memoryDb);
+            res.write(JSON.stringify(json))
             res.end()
         }
 
