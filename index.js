@@ -55,9 +55,25 @@ http.createServer(async function (req, res) {
             res.write(JSON.stringify(json))
             res.end()
         } else if (url.startsWith("/api/name/") && method === 'GET') {
-            console.log("test")
-            res.write("test")
-            res.end()
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            const urlSplit = url.split('/')
+            console.log(urlSplit)
+            const id = urlSplit[urlSplit.length - 1]
+            console.log(id)
+            const object = memoryDb.get(parseInt(id))
+            console.log(object)
+            if (id && object) {
+                res.write(JSON.stringify(object))
+                res.end()
+            } else if (id && object === undefined) {
+                res.writeHead(204);
+                res.end()
+            } else {
+                res.writeHead(404);
+                res.end()
+            }
+
+
         }
 
     } catch (error) {
