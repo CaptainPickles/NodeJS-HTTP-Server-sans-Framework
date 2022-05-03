@@ -70,7 +70,19 @@ http.createServer(async function (req, res) {
                 }
                 res.end(); // ici termine votre route
             });
+        } else if (url.startsWith("/api/name/") && method === 'DELETE') {
+            const urlSplit = url.split("/")
+            const id = urlSplit[urlSplit.length - 1]
+            const toDelete = memoryDb.get(parseInt(id))
+            if (toDelete) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                memoryDb.delete(parseInt(id))
 
+            } else {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+            }
+            res.end()
+        } else if (url === "/api/name" && method === 'PUT') {
 
         }
         else if (url.startsWith("/api/name/") && method === 'GET') {
